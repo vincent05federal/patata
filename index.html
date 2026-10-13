@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Una sorpresa speciale per Tonia ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Quicksand', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #ffccd5 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+            color: #555;
+        }
+
+        /* Sfondo con cuoricini animati */
+        .hearts-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .heart {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 18px;
+            animation: floatUp 5s linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(105vh) scale(0.5) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.9;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.3) rotate(20deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 35px 22px;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(255, 117, 140, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            color: #ff477e;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        p.subtitle {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .gifts-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+        }
+
+        .gift-card {
+            background: #ffffff;
+            border: 2px dashed #ffb3c6;
+            border-radius: 18px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            box-shadow: 0 5px 15px rgba(255, 182, 193, 0.25);
+        }
+
+        .gift-card:active {
+            transform: scale(0.95);
+        }
+
+        .gift-icon {
+            font-size: 2.2rem;
+            margin-bottom: 4px;
+            transition: transform 0.3s ease;
+        }
+
+        .gift-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #444;
+        }
+
+        .gift-content {
+            display: none;
+            font-size: 0.95rem;
+            color: #ff2a6d;
+            font-weight: 700;
+            margin-top: 6px;
+            animation: fadeIn 0.5s ease forwards;
+            line-height: 1.3;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Quando i pacchi si aprono (colore base per gli altri) */
+        .gift-card.open {
+            background: #fff0f3;
+            border: 2px solid #ff758c;
+            transform: translateY(-2px);
+            cursor: default;
+        }
+
+        .gift-card.open .gift-icon {
+            transform: scale(1.15) rotate(8deg);
+        }
+
+        /* Stile speciale ed esclusivo per il pacco scelto da Tonia */
+        .gift-card.selected-by-user {
+            background: linear-gradient(135deg, #ff477e 0%, #ff758c 100%) !important;
+            border: 2px solid #ffffff !important;
+            box-shadow: 0 10px 25px rgba(255, 71, 126, 0.4);
+            transform: scale(1.02);
+        }
+
+        .gift-card.selected-by-user .gift-title,
+        .gift-card.selected-by-user .gift-content {
+            color: #ffffff !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+        }
+
+        #message-box {
+            margin-top: 22px;
+            font-size: 1rem;
+            color: #ff477e;
+            font-weight: 700;
+            min-height: 35px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            line-height: 1.4;
+        }
+
+        #message-box.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sfondo con cuoricini che salgono -->
+    <div class="hearts-bg" id="heartsBg"></div>
+
+    <div class="container">
+        <h1>Tonia, ho una sorpresa per te 🤍</h1>
+        <p class="subtitle">Scegli il pacco che ti ispira di più... vediamo cosa c'è dentro! ✨</p>
+        
+        <div class="gifts-grid" id="giftsGrid">
+            <!-- I pacchi verranno inseriti qui in modo randomico -->
+        </div>
+
+        <div id="message-box"></div>
+    </div>
+
+    <script>
+        // Dati dei pacchi con il proprio testo e il messaggio specifico associato
+        const giftOptions = [
+            { text: "Hai vinto un bacino 💋", response: "è sul pancino 🤭" },
+            { text: "Hai vinto uno schiaffo sul culo 🍑", response: "faccio piano trq 😇" },
+            { text: "Hai vinto un biglietto per casa mia 😉", response: "fai presto che perdi il treno 🚆" }
+        ];
+
+        let revealed = false;
+
+        // Funzione per mischiare casualmente l'array
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Inizializza i pacchi in posizioni casuali
+        function initGifts() {
+            const grid = document.getElementById('giftsGrid');
+            grid.innerHTML = '';
+            
+            let randomizedGifts = [...giftOptions];
+            shuffle(randomizedGifts);
+
+            randomizedGifts.forEach((gift, index) => {
+                const card = document.createElement('div');
+                card.className = 'gift-card';
+                
+                card.innerHTML = `
+                    <div class="gift-icon">🎁</div>
+                    <div class="gift-title">Pacco N.° ${index + 1}</div>
+                    <div class="gift-content">${gift.text}</div>
+                `;
+
+                // Al click passiamo sia la card che la risposta specifica collegata a quel pacco
+                card.addEventListener('click', () => openAllGifts(card, gift.response));
+                grid.appendChild(card);
+            });
+        }
+
+        // Gestisce l'apertura simultanea e mostra il messaggio specifico del pacco scelto
+        function openAllGifts(selectedCard, customMessage) {
+            if (revealed) return;
+            revealed = true;
+
+            const cards = document.querySelectorAll('.gift-card');
+
+            cards.forEach(card => {
+                const icon = card.querySelector('.gift-icon');
+                const title = card.querySelector('.gift-title');
+                const content = card.querySelector('.gift-content');
+
+                icon.textContent = '✨';
+                title.style.display = 'none';
+                content.style.display = 'block';
+
+                card.classList.add('open');
+            });
+
+            // Evidenzia solo quello che ha scelto Tonia con un colore unico
+            selectedCard.classList.add('selected-by-user');
+
+            // Mostra sotto la frase esatta collegata a quel pacco
+            setTimeout(() => {
+                const msgBox = document.getElementById('message-box');
+                msgBox.textContent = customMessage;
+                msgBox.classList.add('show');
+            }, 400);
+        }
+
+        // Generazione cuoricini di sfondo fluidi
+        function createHearts() {
+            const bg = document.getElementById('heartsBg');
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerHTML = '💖';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 2.5 + 4) + 's';
+                heart.style.fontSize = (Math.random() * 12 + 14) + 'px';
+                bg.appendChild(heart);
+
+                setTimeout(() => {
+                    heart.remove();
+                }, 5500);
+            }, 450);
+        }
+
+        window.onload = () => {
+            initGifts();
+            createHearts();
+        };
+    </script>
+</body>
+</html>
